@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>경영기획실 업무 모음</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+  :root {
+    --navy: #17237a;
+    --navy-dark: #101a5c;
+    --orange: #e8590c;
+    --bg: #f7f7f8;
+    --line: #e3e5ea;
+    --text: #1d2433;
+    --sub: #6b7280;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Pretendard', 'Malgun Gothic', sans-serif; background: var(--bg); color: var(--text); }
+  a { color: inherit; }
+
+  /* 상단 얇은 바 */
+  .topbar { height: 44px; display: flex; align-items: center; justify-content: flex-end;
+            padding: 0 24px; font-size: 13px; color: var(--sub); border-bottom: 1px solid var(--line); }
+
+  /* 헤더 */
+  header { background: #fff; display: flex; align-items: center; justify-content: space-between;
+           padding: 22px 46px 22px 25px; border-bottom: 1px solid var(--line); }
+  .brand { display: flex; align-items: center; gap: 18px; }
+  .logo { width: 45px; height: 45px; background: var(--navy); color: #fff; font-weight: 800;
+          font-size: 19px; display: flex; align-items: center; justify-content: center; border-radius: 3px; }
+  .brand-name { font-size: 23px; font-weight: 800; color: var(--navy); }
+  .brand-sub { font-size: 13px; color: var(--sub); margin-top: 3px; }
+  .user-chip { background: #eef0f6; color: var(--navy); font-weight: 700; font-size: 14px;
+               padding: 5px 13px; border-radius: 20px; }
+
+  /* 히어로 */
+  .hero { background: var(--navy); color: #fff; padding: 52px 25px 46px; position: relative; overflow: hidden; }
+  .hero::after { content: ''; position: absolute; right: -180px; top: 0; width: 520px; height: 520px;
+                 border-radius: 50%; background: rgba(255,255,255,0.04); }
+  .eyebrow { display: flex; align-items: center; gap: 10px; font-size: 13px; font-weight: 700;
+             letter-spacing: 2px; color: #b7bde0; }
+  .eyebrow .o { width: 30px; height: 2px; background: var(--orange); }
+  .eyebrow .g { width: 75px; height: 1px; background: rgba(255,255,255,0.3); }
+  .hero h1 { font-size: 34px; font-weight: 800; margin: 18px 0 14px; }
+  .hero p { font-size: 16px; color: #c9cdea; }
+
+  /* 검색·필터 */
+  .toolbar { background: #fff; display: flex; flex-wrap: wrap; align-items: center; gap: 8px;
+             padding: 18px 25px; border-bottom: 1px solid var(--line); }
+  .search { width: 400px; max-width: 100%; height: 48px; border: 1px solid var(--line); border-radius: 4px;
+            padding: 0 18px; font-size: 15px; font-family: inherit; background: #fafafa; margin-right: 6px; }
+  .search:focus { outline: 2px solid var(--navy); background: #fff; }
+  .chip { height: 38px; padding: 0 17px; border: 1px solid var(--line); background: #fff; border-radius: 3px;
+          font-size: 14px; font-family: inherit; cursor: pointer; color: var(--text); }
+  .chip.on { background: var(--navy); color: #fff; border-color: var(--navy); font-weight: 700; }
+
+  /* 섹션 제목 */
+  main { padding: 40px 25px 60px; }
+  .sec-title { display: flex; align-items: center; gap: 14px; padding-bottom: 18px; width: fit-content;
+               border-bottom: 1px solid var(--line); position: relative; margin-bottom: 30px; padding-right: 4px; }
+  .sec-title::after { content: ''; position: absolute; left: 0; bottom: -1px; width: 35px; height: 2px; background: var(--orange); }
+  .sec-no { font-size: 27px; font-weight: 800; color: var(--orange); }
+  .sec-name { font-size: 20px; font-weight: 800; }
+  .count { background: #eef0f6; color: var(--navy); font-size: 13px; font-weight: 700; padding: 3px 12px; border-radius: 20px; }
+
+  /* 카드 */
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 24px; }
+  .card { background: #fff; border: 1px solid var(--line); border-radius: 4px; padding: 30px 30px 30px;
+          display: flex; flex-direction: column; min-height: 270px; transition: box-shadow .15s, transform .15s; }
+  .card:hover { box-shadow: 0 6px 18px rgba(23,35,122,0.08); transform: translateY(-2px); }
+  .card-top { display: flex; justify-content: space-between; align-items: flex-start; }
+  .icon { font-size: 30px; line-height: 1; }
+  .tag { background: #eef0f6; color: var(--navy); font-size: 12px; font-weight: 700; padding: 5px 12px; border-radius: 3px; }
+  .card h3 { font-size: 19px; font-weight: 800; color: var(--navy); margin: 16px 0 12px; }
+  .card p { font-size: 15px; color: var(--sub); line-height: 1.7; flex: 1; }
+  .card-foot { border-top: 1px solid var(--line); margin-top: 18px; padding-top: 15px; display: flex; justify-content: flex-end; }
+  .open { background: var(--navy); color: #fff; text-decoration: none; font-weight: 700; font-size: 15px;
+          padding: 10px 22px; border-radius: 4px; }
+  .open:hover { background: var(--navy-dark); }
+  .open.off { background: #c9ccd6; pointer-events: none; }
+  .empty { color: var(--sub); padding: 40px 0; }
+</style>
+</head>
+<body>
+
+<div class="topbar">파리크라상 · 경영기획실</div>
+
+<header>
+  <div class="brand">
+    <div class="logo">PC</div>
+    <div>
+      <div class="brand-name">Paris Croissant</div>
+      <div class="brand-sub">경영기획실 포털</div>
+    </div>
+  </div>
+  <span class="user-chip">j.hyun</span>
+</header>
+
+<section class="hero">
+  <div class="eyebrow"><span class="o"></span><span class="g"></span>HUB</div>
+  <h1>경영기획실 업무 모음</h1>
+  <p>업무용 대시보드와 자동화 도구를 한 곳에서 관리하고 바로 열어보세요.</p>
+</section>
+
+<div class="toolbar">
+  <input class="search" id="q" placeholder="이름 또는 설명 검색...">
+  <div id="chips" style="display:flex; gap:8px; flex-wrap:wrap;"></div>
+</div>
+
+<main>
+  <div class="sec-title">
+    <span class="sec-no">01</span><span class="sec-name" id="secName">전체 도구</span><span class="count" id="cnt">0</span>
+  </div>
+  <div class="grid" id="grid"></div>
+</main>
+
+<script>
+/* ============================================================
+   ★ 여기만 고치면 됩니다 ★
+   - name : 카드 제목
+   - desc : 설명
+   - cat  : 분류 (같은 이름끼리 필터 버튼으로 자동 묶임)
+   - icon : 이모지 아무거나
+   - url  : 열 주소
+            · 같은 저장소에 올린 HTML → 'tools/파일명.html'
+            · 앱스 스크립트 웹앱·구글 시트 → 'https://...' 전체 주소
+            · 비워두면('') '준비중' 버튼으로 표시
+   ============================================================ */
+const TOOLS = [
+  { name: '공항 여객 × 샌드쿠키 매출', desc: '인천·제주공항 예상승객 실시간 수집 · 매출 연동 분석', cat: '대시보드', icon: '✈️', url: '' },
+  { name: '직영점 폐점 분석',          desc: '직영점 월 실적 기반 폐점 분석 · 자동 메일',          cat: '대시보드', icon: '📉', url: '' },
+  { name: '출점 지도',                 desc: '점포주소 기반 출점 지도 · 후보지 분석',              cat: '대시보드', icon: '🗺️', url: '' },
+  { name: '조직별 손익계산서',         desc: '직영점 손익마스터 기반 조직별 손익 대시보드',        cat: '대시보드', icon: '📊', url: '' },
+  { name: '날씨·공휴일 매출 영향',     desc: '기상청 ASOS 데이터와 직영점 매출 비교 분석',         cat: '매출',     icon: '🌤️', url: '' },
+  { name: '매출예측',                  desc: '팀 대시보드용 매출예측 기능',                        cat: '매출',     icon: '🔮', url: '' },
+  { name: 'SPC-TALK 매출 PUSH 보드',   desc: 'SPC-TALK 매출 PUSH 저장·누적 조회',                 cat: '매출',     icon: '📣', url: '' },
+  { name: 'DART 재무제표',             desc: 'OpenDART API로 여러 회사 재무제표 비교',             cat: '도구',     icon: '🏢', url: '' },
+  { name: 'ERP 출력 자동화',           desc: 'ERP 자동 접속 · 프린터 출력 자동화',                 cat: '도구',     icon: '🖨️', url: '' }
+];
+/* ============================================================ */
+
+let cat = '전체';
+const grid = document.getElementById('grid');
+const q = document.getElementById('q');
+
+function drawChips() {
+  const cats = ['전체'].concat([...new Set(TOOLS.map(t => t.cat))].sort());
+  document.getElementById('chips').innerHTML = cats.map(c =>
+    `<button class="chip ${c === cat ? 'on' : ''}" data-c="${c}">${c}</button>`).join('');
+  document.querySelectorAll('.chip').forEach(b => b.onclick = () => { cat = b.dataset.c; drawChips(); draw(); });
+}
+
+function draw() {
+  const k = q.value.trim().toLowerCase();
+  const list = TOOLS.filter(t =>
+    (cat === '전체' || t.cat === cat) &&
+    (!k || (t.name + ' ' + t.desc).toLowerCase().includes(k)));
+  document.getElementById('cnt').textContent = list.length;
+  document.getElementById('secName').textContent = cat === '전체' ? '전체 도구' : cat;
+  grid.innerHTML = list.length ? list.map(t => `
+    <div class="card">
+      <div class="card-top"><span class="icon">${t.icon || '📄'}</span><span class="tag">${t.cat}</span></div>
+      <h3>${t.name}</h3>
+      <p>${t.desc || ''}</p>
+      <div class="card-foot">
+        ${t.url ? `<a class="open" href="${t.url}" target="_blank">열기 →</a>`
+                : `<span class="open off">준비중</span>`}
+      </div>
+    </div>`).join('') : '<div class="empty">검색 결과가 없습니다.</div>';
+}
+
+q.oninput = draw;
+drawChips();
+draw();
+</script>
+</body>
+</html>
