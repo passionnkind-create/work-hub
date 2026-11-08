@@ -80,12 +80,50 @@
   .open:hover { background: var(--navy-dark); }
   .open.off { background: #c9ccd6; pointer-events: none; }
   .empty { color: var(--sub); padding: 40px 0; }
+
+  /* 로그인 화면 */
+  #login { display: none; min-height: calc(100vh - 44px); padding: 24px; }
+  .login-brand { text-align: right; font-weight: 800; color: var(--navy); font-size: 16px; }
+  .login-wrap { width: 435px; max-width: 100%; margin: 100px auto 0; }
+  .login-wrap h2 { font-size: 32px; font-weight: 800; color: var(--navy); padding-bottom: 14px;
+                   border-bottom: 2px solid var(--navy); position: relative; margin-bottom: 30px; }
+  .login-wrap h2::after { content: ''; position: absolute; left: 0; bottom: -2px; width: 45px; height: 2px; background: var(--orange); }
+  .login-box { background: #fff; border: 1px solid var(--navy); border-radius: 6px; padding: 30px; }
+  .login-box label { display: block; font-weight: 700; color: #33415c; margin: 0 0 8px; font-size: 16px; }
+  .login-box select, .login-box input { width: 100%; height: 54px; border: 1px solid var(--line); border-radius: 5px;
+                   padding: 0 18px; font-size: 16px; font-family: inherit; margin-bottom: 20px; background: #fff; }
+  .login-box button { width: 100%; height: 54px; background: var(--navy); color: #fff; border: 0; border-radius: 5px;
+                   font-size: 17px; font-weight: 800; font-family: inherit; cursor: pointer; }
+  .login-err { color: #d6336c; font-size: 14px; margin: -8px 0 14px; min-height: 0; }
+  .login-note { color: var(--sub); font-size: 14px; margin-top: 16px; }
+  #app { display: none; }
+  .head-right { display: flex; align-items: center; gap: 14px; }
+  .logout { color: var(--navy); font-size: 15px; cursor: pointer; text-decoration: underline; background: none; border: 0; font-family: inherit; }
 </style>
 </head>
 <body>
 
 <div class="topbar">파리크라상 · 경영기획실</div>
 
+<!-- ===== 로그인 화면 ===== -->
+<section id="login">
+  <div class="login-brand">파리크라상</div>
+  <div class="login-wrap">
+    <h2>경영기획실 허브</h2>
+    <form class="login-box" id="loginForm">
+      <label for="uid">ID</label>
+      <select id="uid"></select>
+      <label for="upw">비밀번호</label>
+      <input id="upw" type="password" autocomplete="current-password">
+      <div class="login-err" id="loginErr"></div>
+      <button type="submit">로그인</button>
+    </form>
+    <div class="login-note">로그인은 1일간 유지됩니다.</div>
+  </div>
+</section>
+
+<!-- ===== 본 화면 ===== -->
+<div id="app">
 <header>
   <div class="brand">
     <div class="logo">PC</div>
@@ -94,7 +132,10 @@
       <div class="brand-sub">경영기획실 포털</div>
     </div>
   </div>
-  <span class="user-chip">j.hyun</span>
+  <div class="head-right">
+    <span class="user-chip" id="who">ID</span>
+    <button class="logout" id="logoutBtn">로그아웃</button>
+  </div>
 </header>
 
 <section class="hero">
@@ -114,8 +155,23 @@
   </div>
   <div class="grid" id="grid"></div>
 </main>
+</div>
 
 <script>
+/* ============================================================
+   ★ 로그인 계정 ★
+   - id   : 로그인 화면 드롭다운에 보이는 이름
+   - hash : 비밀번호를 암호화한 값 (비밀번호 원문은 코드에 안 남김)
+   새 비밀번호의 hash 만들기: 허브 주소 끝에 ?hash 를 붙여 접속
+     예) https://passionnkind-create.github.io/work-hub/?hash
+   ============================================================ */
+const USERS = [
+  { id: '1', hash: 'b0efc797ea75795a4fc4d408463c70b8900e59baf58a91b6fa9761ec77e1681c' },
+  { id: '2', hash: 'b0efc797ea75795a4fc4d408463c70b8900e59baf58a91b6fa9761ec77e1681c' }
+];
+const KEEP_HOURS = 24;   // 로그인 유지 시간
+/* ============================================================ */
+
 /* ============================================================
    ★ 여기만 고치면 됩니다 ★
    - name : 카드 제목
@@ -173,8 +229,70 @@ function draw() {
 }
 
 q.oninput = draw;
-drawChips();
-draw();
+
+/* ---------- 로그인 처리 ---------- */
+const SKEY = 'workhub_session';
+
+async function sha256(text) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
+  return [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2, '0')).join('');
+}
+function getSession() {
+  try {
+    const s = JSON.parse(localStorage.getItem(SKEY) || 'null');
+    if (s && s.until > Date.now() && USERS.some(u => u.id === s.id)) return s;
+  } catch (e) {}
+  return null;
+}
+function showApp(s) {
+  document.getElementById('login').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+  document.getElementById('who').textContent = 'ID ' + s.id;
+  drawChips();
+  draw();
+}
+function showLogin() {
+  document.getElementById('app').style.display = 'none';
+  document.getElementById('login').style.display = 'block';
+  document.getElementById('uid').innerHTML = USERS.map(u => `<option>${u.id}</option>`).join('');
+}
+
+document.getElementById('loginForm').onsubmit = async (e) => {
+  e.preventDefault();
+  const id = document.getElementById('uid').value;
+  const pw = document.getElementById('upw').value;
+  const user = USERS.find(u => u.id === id);
+  if (user && await sha256(pw) === user.hash) {
+    const s = { id: id, until: Date.now() + KEEP_HOURS * 3600 * 1000 };
+    try { localStorage.setItem(SKEY, JSON.stringify(s)); } catch (err) {}
+    document.getElementById('upw').value = '';
+    document.getElementById('loginErr').textContent = '';
+    showApp(s);
+  } else {
+    document.getElementById('loginErr').textContent = '비밀번호가 맞지 않습니다.';
+  }
+};
+document.getElementById('logoutBtn').onclick = () => {
+  try { localStorage.removeItem(SKEY); } catch (e) {}
+  showLogin();
+};
+
+/* ---------- ?hash : 새 비밀번호 hash 만들기 ---------- */
+if (location.search.includes('hash')) {
+  document.body.innerHTML = `
+    <div style="max-width:520px;margin:80px auto;font-family:Pretendard,sans-serif;padding:0 20px">
+      <h2 style="color:#17237a;margin-bottom:16px">비밀번호 hash 만들기</h2>
+      <input id="p" type="text" placeholder="새 비밀번호 입력" style="width:100%;height:48px;padding:0 14px;font-size:16px;border:1px solid #ccc;border-radius:5px">
+      <p style="margin:16px 0 6px;color:#555">아래 값을 복사해 USERS 의 hash 자리에 붙여넣으세요.</p>
+      <textarea id="h" readonly style="width:100%;height:70px;padding:10px;font-size:14px;border:1px solid #ccc;border-radius:5px"></textarea>
+    </div>`;
+  document.getElementById('p').oninput = async (e) => {
+    document.getElementById('h').value = e.target.value ? await sha256(e.target.value) : '';
+  };
+} else {
+  const s = getSession();
+  s ? showApp(s) : showLogin();
+}
 </script>
 </body>
 </html>
